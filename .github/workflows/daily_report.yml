@@ -1,25 +1,7 @@
-name: BVC Data Engine
-on:
-  schedule:
-    - cron: '0 21 * * *' # 5:00 PM Caracas
-  workflow_dispatch: # Permite ejecutarlo manualmente
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-      - name: Install dependencies
-        run: pip install requests pdfplumber
-      - name: Run Scraper
-        run: python scripts/get_report.py
-      - name: Push changes
+- name: Push changes
         run: |
-          git config --global user.name 'Data-Bot'
-          git config --global user.email 'bot@noreply.github.com'
-          git add .
-          git commit -m "Actualización diaria de mercado" || exit 0
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/  # Forzamos a que agregue la carpeta data
+          git commit -m "Actualización de datos: $(date +'%Y-%m-%d')" || echo "No hay cambios para subir"
           git push
