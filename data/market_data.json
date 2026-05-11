@@ -1,0 +1,10 @@
+{
+    "last_update": "11/05/2026 11:21 PM",
+    "stocks": [
+        {
+            "ticker": "TEST",
+            "precio": "100,00",
+            "variacion": "1,50%"
+        }
+    ]
+}
