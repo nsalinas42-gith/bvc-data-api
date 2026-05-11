@@ -1,29 +1,32 @@
-import requests, pdfplumber, json, os
+import os
+import json
 from datetime import datetime
 
 def run():
-    url = "https://rendivalores.com/wp-content/uploads/Informe-de-cierre-diario.pdf"
+    # 1. Asegurar que la carpeta existe
+    folder = "data"
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+        print(f"Carpeta '{folder}' creada.")
+
+    # 2. Definir la ruta del archivo
+    file_path = os.path.join(folder, "market_data.json")
+
+    # 3. Crear datos de prueba mínimos
+    test_data = {
+        "last_update": datetime.now().strftime("%d/%m/%Y %I:%M %p"),
+        "stocks": [
+            {"ticker": "TEST", "precio": "100,00", "variacion": "1,50%"}
+        ]
+    }
+
+    # 4. Intentar escribir el archivo
     try:
-        r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
-        if r.status_code == 200:
-            with open("data/informe_diario.pdf", 'wb') as f: f.write(r.content)
-            stocks = []
-            with pdfplumber.open("data/informe_diario.pdf") as pdf:
-                table = pdf.pages[0].extract_table()
-                if table:
-                    for row in table[1:]:
-                        if row[0] and row[1]:
-                            stocks.append({
-                                "ticker": row[0].split('\n')[-1],
-                                "precio": row[1].split('\n')[0],
-                                "variacion": row[1].split('\n')[1] if '\n' in row[1] else "0,00%"
-                            })
-            output = {"last_update": datetime.now().strftime("%d/%m/%Y %I:%M %p"), "stocks": stocks}
-            with open("data/market_data.json", 'w', encoding='utf-8') as f:
-                json.dump(output, f, indent=4)
-            print(f"Éxito: {len(stocks)} acciones.")
-    except Exception as e: print(f"Error: {e}")
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(test_data, f, indent=4)
+        print(f"✅ ARCHIVO CREADO EN: {file_path}")
+    except Exception as e:
+        print(f"❌ ERROR AL ESCRIBIR: {e}")
 
 if __name__ == "__main__":
-    if not os.path.exists('data'): os.makedirs('data')
     run()
