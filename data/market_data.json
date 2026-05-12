@@ -1,10 +1,90 @@
 {
-    "last_update": "11/05/2026 11:21 PM",
+    "last_update": "12/05/2026 12:09 AM",
     "stocks": [
         {
-            "ticker": "TEST",
-            "precio": "100,00",
-            "variacion": "1,50%"
+            "ticker": "las",
+            "precio": "de",
+            "variacion": "13,88%"
+        },
+        {
+            "ticker": "y",
+            "precio": "por",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "Entre",
+            "precio": "las",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "seguidas",
+            "precio": "por",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "BNC",
+            "precio": "BPV",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "Banco",
+            "precio": "del",
+            "variacion": "-2,45%"
+        },
+        {
+            "ticker": "Banco",
+            "precio": "Nacional",
+            "variacion": "-0,72%"
+        },
+        {
+            "ticker": "Banco",
+            "precio": "Provincial",
+            "variacion": "1,22%"
+        },
+        {
+            "ticker": "Bolsa",
+            "precio": "de",
+            "variacion": "13,88%"
+        },
+        {
+            "ticker": "Invaca",
+            "precio": "IVC.A",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "Invaca",
+            "precio": "IVC.B",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "Manufacturera",
+            "precio": "de",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "PIVCA",
+            "precio": "Promotora",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "Protinal",
+            "precio": "PTN",
+            "variacion": "0,00%"
+        },
+        {
+            "ticker": "Ron",
+            "precio": "Santa",
+            "variacion": "-0,93%"
+        },
+        {
+            "ticker": "Ron",
+            "precio": "Santa",
+            "variacion": "1,25%"
+        },
+        {
+            "ticker": "CANTV",
+            "precio": "TDV.D",
+            "variacion": "0,00%"
         }
     ]
 }
