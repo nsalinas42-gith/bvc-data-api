@@ -1,90 +1,11 @@
 {
-    "last_update": "13/05/2026 01:33 PM",
-    "stocks": [
-        {
-            "ticker": "encuentran",
-            "precio": "las",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "por",
-            "precio": "las",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "BS",
-            "precio": ".",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "con",
-            "precio": "Bs.",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "RST",
-            "precio": "BVCC",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "Banco",
-            "precio": "del",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "Banco",
-            "precio": "Nacional",
-            "variacion": "0,73%"
-        },
-        {
-            "ticker": "Banco",
-            "precio": "Provincial",
-            "variacion": "-1,61%"
-        },
-        {
-            "ticker": "Bolsa",
-            "precio": "de",
-            "variacion": "16,39%"
-        },
-        {
-            "ticker": "Invaca",
-            "precio": "IVC.A",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "Invaca",
-            "precio": "IVC.B",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "Manufacturera",
-            "precio": "de",
-            "variacion": "-2,90%"
-        },
-        {
-            "ticker": "PIVCA",
-            "precio": "Promotora",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "Protinal",
-            "precio": "PTN",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "Ron",
-            "precio": "Santa",
-            "variacion": "-0,94%"
-        },
-        {
-            "ticker": "Ron",
-            "precio": "Santa",
-            "variacion": "0,00%"
-        },
-        {
-            "ticker": "CANTV",
-            "precio": "TDV.D",
-            "variacion": "0,00%"
-        }
-    ]
+    "last_update": "13/05/2026 02:00 PM",
+    "market_summary": {
+        "dolar_bcv": "0",
+        "ibc_principal": "0",
+        "ind_financiero": "0",
+        "ind_industrial": "0",
+        "volumen_total": "0"
+    },
+    "stocks": []
 }
