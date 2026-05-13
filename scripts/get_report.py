@@ -5,31 +5,47 @@ import re
 import os
 from datetime import datetime
 
-# URL del PDF (según el hallazgo en la sesión técnica)
 URL = "https://rendivalores.com/assets/pdfs/resumen/resumen-diario-rendivalores.pdf"
 DATA_PATH = "data/market_data.json"
+TEMP_PDF = "temp.pdf"
 
-def safe_extract(pattern, text, default="N/A"):
-    """Busca un patrón y devuelve el grupo 1, si no existe devuelve el default."""
-    match = re.search(pattern, text)
+def safe_extract(pattern, text, default="0"):
+    """Busca un patrón y devuelve el grupo 1 de forma segura."""
+    match = re.search(pattern, text, re.IGNORECASE)
     if match:
-        try:
-            return match.group(1)
-        except IndexError:
-            return default
+        return match.group(1).strip()
     return default
 
 def extract_data():
-    # ... (código anterior de descarga y apertura del PDF)
+    print(f"📥 Descargando reporte desde: {URL}")
+    headers = {'User-Agent': 'Mozilla/5.0'}
     
-    with pdfplumber.open("temp.pdf") as pdf:
+    try:
+        response = requests.get(URL, headers=headers, timeout=15)
+        response.raise_for_status() # Lanza error si la descarga falla (404, 500, etc)
+        with open(TEMP_PDF, "wb") as f:
+            f.write(response.content)
+    except Exception as e:
+        print(f"❌ Error descargando el PDF: {e}")
+        return
+
+    results = {
+        "last_update": datetime.now().strftime("%d/%m/%Y %I:%M %p"),
+        "market_summary": {},
+        "stocks": []
+    }
+
+    if not os.path.exists(TEMP_PDF):
+        print("❌ Error: El archivo temp.pdf no se encontró después de la descarga.")
+        return
+
+    with pdfplumber.open(TEMP_PDF) as pdf:
         full_text = ""
         for page in pdf.pages:
-            # Forzamos la extracción de texto para que sea más limpia
-            full_text += page.extract_text(layout=True) + "\n"
+            full_text += page.extract_text() + "\n"
 
-        # --- Extracción de Indicadores con el nuevo método seguro ---
-        # El patrón [\d,.]+ busca números con puntos y comas
+        # --- Extracción de Indicadores (Ajustado al formato Rendivalores) ---
+        # Usamos nombres clave que suelen aparecer en el PDF
         results["market_summary"] = {
             "dolar_bcv": safe_extract(r"BCV[:\s]+([\d,.]+)", full_text),
             "ibc_principal": safe_extract(r"IBC[:\s]+([\d,.]+)", full_text),
@@ -38,12 +54,11 @@ def extract_data():
             "volumen_total": safe_extract(r"Efectivo\s+Varios[:\s]+([\d,.]+)", full_text)
         }
 
-        # --- Monitor de Acciones ---
-        # Ajustamos el regex para que sea más tolerante a espacios y saltos de línea
+        # --- Monitor de Acciones (17 acciones comunes) ---
+        # Este regex captura: TICKER | PRECIO | VARIACIÓN | VOLUMEN
         stock_pattern = re.compile(r"([A-Z]{3,6})\s+([\d,.]+)\s+([+-]?[\d,.]+%)\s+([\d,.]+)")
         matches = stock_pattern.findall(full_text)
-        
-        # Limpiamos duplicados o basura si es necesario
+
         for match in matches:
             results["stocks"].append({
                 "ticker": match[0],
@@ -52,15 +67,17 @@ def extract_data():
                 "volumen": match[3]
             })
 
-    # Guardado del archivo (se mantiene igual)
-    # ...
     # Asegurar que la carpeta data existe
     os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
 
     with open(DATA_PATH, "w") as j:
         json.dump(results, j, indent=4)
     
-    print(f"✅ Datos guardados exitosamente en {DATA_PATH}")
+    print(f"✅ Proceso finalizado. {len(results['stocks'])} acciones procesadas.")
+    
+    # Limpieza
+    if os.path.exists(TEMP_PDF):
+        os.remove(TEMP_PDF)
 
 if __name__ == "__main__":
     extract_data()
