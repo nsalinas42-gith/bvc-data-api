@@ -1,10 +1,10 @@
 {
-    "last_update": "13/05/2026 02:00 PM",
+    "last_update": "13/05/2026 02:08 PM",
     "market_summary": {
         "dolar_bcv": "0",
-        "ibc_principal": "0",
-        "ind_financiero": "0",
-        "ind_industrial": "0",
+        "ibc_principal": ".",
+        "ind_financiero": ".",
+        "ind_industrial": ".",
         "volumen_total": "0"
     },
     "stocks": []
