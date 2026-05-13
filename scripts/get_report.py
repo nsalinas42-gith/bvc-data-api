@@ -11,11 +11,12 @@ DATA_PATH = "data/market_data.json"
 def extract_data():
     headers = {'User-Agent': 'Mozilla/5.0'}
     try:
-        response = requests.get(URL, headers=headers, timeout=15)
+        print(f"Buscando PDF en: {URL}")
+        response = requests.get(URL, headers=headers, timeout=20)
         with open("temp.pdf", "wb") as f:
             f.write(response.content)
     except Exception as e:
-        print(f"Error descarga: {e}")
+        print(f"Error de red: {e}")
         return
 
     results = {
@@ -25,41 +26,42 @@ def extract_data():
     }
 
     with pdfplumber.open("temp.pdf") as pdf:
-        # 1. Extraemos texto plano solo para el resumen (BCV, IBC)
         full_text = ""
         for page in pdf.pages:
-            full_text += page.extract_text() + "\n"
+            # Extraemos el texto crudo
+            text = page.extract_text() or ""
+            full_text += text + "\n"
+        
+        # Muestra en la consola de GitHub qué está leyendo realmente
+        print("--- DEBUG: INICIO DEL TEXTO EXTRAÍDO ---")
+        print(full_text[:500]) # Solo los primeros 500 caracteres para no saturar
+        print("--- DEBUG: FIN DEL TEXTO ---")
 
-        # Regex mejorado para capturar solo el número
-        results["market_summary"]["dolar_bcv"] = (re.findall(r"BCV\s*([\d,.]+)", full_text) + ["0"])[0]
-        results["market_summary"]["ibc_principal"] = (re.findall(r"IBC\s*([\d,.]+)", full_text) + ["0"])[0]
-        results["market_summary"]["volumen_total"] = (re.findall(r"Efectivo\s*([\d,.]+)", full_text) + ["0"])[0]
+        # 1. Resumen de Mercado (Búsqueda por palabras clave ultra-flexible)
+        results["market_summary"]["dolar_bcv"] = (re.findall(r"BCV.*?([\d,.]+)", full_text, re.S) + ["0"])[0]
+        results["market_summary"]["ibc_principal"] = (re.findall(r"IBC.*?([\d,.]+)", full_text, re.S) + ["0"])[0]
+        
+        # 2. Monitor de Acciones (Búsqueda de filas de tabla por texto)
+        # Este Regex busca: Mayúsculas (Ticker) + Espacio + Número (Precio) + Espacio + Porcentaje (Variación)
+        # Ejemplo: BNC 1.250,00 +1,50%
+        stock_matches = re.findall(r"([A-Z]{3,6})\s+([\d,.]+)\s+([+-]?[\d,.]+%)\s+([\d,.]+)", full_text)
+        
+        for m in stock_matches:
+            if m[0] not in ["FECHA", "TOTAL", "RIF"]:
+                results["stocks"].append({
+                    "ticker": m[0],
+                    "precio": m[1],
+                    "variacion": m[2],
+                    "volumen": m[3]
+                })
 
-        # 2. Extraemos TABLAS para las acciones
-        for page in pdf.pages:
-            tables = page.extract_tables()
-            for table in tables:
-                for row in table:
-                    # Una fila válida de acciones suele tener: TICKER, PRECIO, VARIACIÓN, VOLUMEN
-                    # Ejemplo: ['BNC', '1.350,00', '+1,20%', '50.000']
-                    if row and len(row) >= 3:
-                        ticker = str(row[0]).strip()
-                        # Validamos que el ticker sea Mayúsculas y de 3 a 6 caracteres
-                        if re.match(r"^[A-Z]{3,6}$", ticker):
-                            results["stocks"].append({
-                                "ticker": ticker,
-                                "precio": str(row[1]).strip(),
-                                "variacion": str(row[2]).strip(),
-                                "volumen": str(row[3]).strip() if len(row) > 3 else "0"
-                            })
-
-    # Guardar y limpiar
+    # Guardado Forzado
     os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
     with open(DATA_PATH, "w") as j:
         json.dump(results, j, indent=4)
     
     if os.path.exists("temp.pdf"): os.remove("temp.pdf")
-    print(f"✅ Scraping completado. Datos guardados. Acciones: {len(results['stocks'])}")
+    print(f"✅ Scraping finalizado. Acciones: {len(results['stocks'])}")
 
 if __name__ == "__main__":
     extract_data()
