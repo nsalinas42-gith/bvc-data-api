@@ -26,11 +26,10 @@ jobs:
       - name: Run Scraper
         run: python scripts/get_report.py
 
-      - name: Push changes
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          mkdir -p data
-          git add data/
-          git commit -m "Auto-update BVC data" || exit 0
-          git push
+      - name: Commit and Push changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add data/market_data.json
+        git commit -m "Auto-update: Datos de la BVC $(date +'%Y-%m-%d')" || exit 0
+        git push
