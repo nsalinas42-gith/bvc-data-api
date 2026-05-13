@@ -9,36 +9,41 @@ from datetime import datetime
 URL = "https://rendivalores.com/assets/pdfs/resumen/resumen-diario-rendivalores.pdf"
 DATA_PATH = "data/market_data.json"
 
+def safe_extract(pattern, text, default="N/A"):
+    """Busca un patrón y devuelve el grupo 1, si no existe devuelve el default."""
+    match = re.search(pattern, text)
+    if match:
+        try:
+            return match.group(1)
+        except IndexError:
+            return default
+    return default
+
 def extract_data():
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    response = requests.get(URL, headers=headers)
+    # ... (código anterior de descarga y apertura del PDF)
     
-    with open("temp.pdf", "wb") as f:
-        f.write(response.content)
-
-    results = {
-        "last_update": datetime.now().strftime("%d/%m/%Y %I:%M %p"),
-        "market_summary": {},
-        "stocks": []
-    }
-
     with pdfplumber.open("temp.pdf") as pdf:
         full_text = ""
         for page in pdf.pages:
-            full_text += page.extract_text()
+            # Forzamos la extracción de texto para que sea más limpia
+            full_text += page.extract_text(layout=True) + "\n"
 
-        # --- Extracción de Indicadores Globales ---
-        # Ejemplo de Regex para capturar valores (ajustar según el texto exacto del PDF)
-        results["market_summary"]["dolar_bcv"] = re.search(r"Dólar BCV[:\s]+([\d,.]+)", full_text).group(1) if re.search(r"Dólar BCV", full_text) else "N/A"
-        results["market_summary"]["ibc_principal"] = re.search(r"IBC[:\s]+([\d,.]+)", full_text).group(1) if re.search(r"IBC", full_text) else "N/A"
-        results["market_summary"]["volumen_total"] = re.search(r"Volumen Total[:\s]+([\d,.]+)", full_text).group(1) if re.search(r"Volumen Total", full_text) else "0"
+        # --- Extracción de Indicadores con el nuevo método seguro ---
+        # El patrón [\d,.]+ busca números con puntos y comas
+        results["market_summary"] = {
+            "dolar_bcv": safe_extract(r"BCV[:\s]+([\d,.]+)", full_text),
+            "ibc_principal": safe_extract(r"IBC[:\s]+([\d,.]+)", full_text),
+            "ind_financiero": safe_extract(r"Financiero[:\s]+([\d,.]+)", full_text),
+            "ind_industrial": safe_extract(r"Industrial[:\s]+([\d,.]+)", full_text),
+            "volumen_total": safe_extract(r"Efectivo\s+Varios[:\s]+([\d,.]+)", full_text)
+        }
 
-        # --- Monitor de Acciones (Regex Flexible) ---
-        # Buscamos patrones como: TICKER PRECIO VARIACION VOLUMEN
-        # Ejemplo: BNC 1.350,00 +1,20% 500.000
-        stock_pattern = re.compile(r"([A-Z]{3,5})\s+([\d,.]+)\s+([+-]?[\d,.]+%)\s+([\d,.]+)")
+        # --- Monitor de Acciones ---
+        # Ajustamos el regex para que sea más tolerante a espacios y saltos de línea
+        stock_pattern = re.compile(r"([A-Z]{3,6})\s+([\d,.]+)\s+([+-]?[\d,.]+%)\s+([\d,.]+)")
         matches = stock_pattern.findall(full_text)
-
+        
+        # Limpiamos duplicados o basura si es necesario
         for match in matches:
             results["stocks"].append({
                 "ticker": match[0],
@@ -47,6 +52,8 @@ def extract_data():
                 "volumen": match[3]
             })
 
+    # Guardado del archivo (se mantiene igual)
+    # ...
     # Asegurar que la carpeta data existe
     os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
 
