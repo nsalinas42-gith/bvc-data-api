@@ -8,73 +8,58 @@ from datetime import datetime
 URL = "https://rendivalores.com/assets/pdfs/resumen/resumen-diario-rendivalores.pdf"
 DATA_PATH = "data/market_data.json"
 
-def clean_text(text):
-    # Elimina múltiples espacios y saltos de línea para facilitar el Regex
-    return " ".join(text.split())
-
-def safe_extract(pattern, text, default="0"):
-    match = re.search(pattern, text, re.IGNORECASE)
-    if match:
-        return match.group(1).replace(".", "X").replace(",", ".").replace("X", ",").strip() # Normaliza formato si quieres, o déjalo igual
-    return default
-
 def extract_data():
     headers = {'User-Agent': 'Mozilla/5.0'}
     try:
         response = requests.get(URL, headers=headers, timeout=15)
         with open("temp.pdf", "wb") as f:
             f.write(response.content)
-    except:
+    except Exception as e:
+        print(f"Error descarga: {e}")
         return
 
     results = {
         "last_update": datetime.now().strftime("%d/%m/%Y %I:%M %p"),
-        "market_summary": {},
+        "market_summary": {"dolar_bcv": "0", "ibc_principal": "0", "ind_financiero": "0", "ind_industrial": "0", "volumen_total": "0"},
         "stocks": []
     }
 
     with pdfplumber.open("temp.pdf") as pdf:
-        # Extraemos texto de TODAS las páginas y lo limpiamos
-        raw_text = ""
+        # 1. Extraemos texto plano solo para el resumen (BCV, IBC)
+        full_text = ""
         for page in pdf.pages:
-            raw_text += page.extract_text() + " "
-        
-        full_text = clean_text(raw_text)
-        
-        # --- EXTRACCIÓN AGRESIVA ---
-        # Buscamos el valor numérico más cercano a la palabra clave
-        results["market_summary"] = {
-            "dolar_bcv": safe_extract(r"BCV\s*[:\s]*([\d,.]+)", full_text),
-            "ibc_principal": safe_extract(r"IBC\s*[:\s]*([\d,.]+)", full_text),
-            "ind_financiero": safe_extract(r"Financiero\s*[:\s]*([\d,.]+)", full_text),
-            "ind_industrial": safe_extract(r"Industrial\s*[:\s]*([\d,.]+)", full_text),
-            "volumen_total": safe_extract(r"Efectivo\s*[:\s]*([\d,.]+)", full_text)
-        }
+            full_text += page.extract_text() + "\n"
 
-        # --- EXTRACCIÓN DE ACCIONES ---
-        # Buscamos: Letras Mayúsculas (Ticker) + Precio + Variación (%)
-        # Ejemplo: "BNC 1.350,00 +1,20%"
-        stock_matches = re.findall(r"([A-Z]{3,6})\s+([\d,.]+)\s+([+-]?[\d,.]+%)\s+([\d,.]+)", full_text)
-        
-        seen = set()
-        for m in stock_matches:
-            ticker = m[0]
-            if ticker not in ["TOTAL", "MONTO", "RESUMEN"] and ticker not in seen:
-                results["stocks"].append({
-                    "ticker": ticker,
-                    "precio": m[1],
-                    "variacion": m[2],
-                    "volumen": m[3]
-                })
-                seen.add(ticker)
+        # Regex mejorado para capturar solo el número
+        results["market_summary"]["dolar_bcv"] = (re.findall(r"BCV\s*([\d,.]+)", full_text) + ["0"])[0]
+        results["market_summary"]["ibc_principal"] = (re.findall(r"IBC\s*([\d,.]+)", full_text) + ["0"])[0]
+        results["market_summary"]["volumen_total"] = (re.findall(r"Efectivo\s*([\d,.]+)", full_text) + ["0"])[0]
 
-    # Guardar
+        # 2. Extraemos TABLAS para las acciones
+        for page in pdf.pages:
+            tables = page.extract_tables()
+            for table in tables:
+                for row in table:
+                    # Una fila válida de acciones suele tener: TICKER, PRECIO, VARIACIÓN, VOLUMEN
+                    # Ejemplo: ['BNC', '1.350,00', '+1,20%', '50.000']
+                    if row and len(row) >= 3:
+                        ticker = str(row[0]).strip()
+                        # Validamos que el ticker sea Mayúsculas y de 3 a 6 caracteres
+                        if re.match(r"^[A-Z]{3,6}$", ticker):
+                            results["stocks"].append({
+                                "ticker": ticker,
+                                "precio": str(row[1]).strip(),
+                                "variacion": str(row[2]).strip(),
+                                "volumen": str(row[3]).strip() if len(row) > 3 else "0"
+                            })
+
+    # Guardar y limpiar
     os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
     with open(DATA_PATH, "w") as j:
         json.dump(results, j, indent=4)
     
     if os.path.exists("temp.pdf"): os.remove("temp.pdf")
-    print(f"✅ Scraping completado. Acciones encontradas: {len(results['stocks'])}")
+    print(f"✅ Scraping completado. Datos guardados. Acciones: {len(results['stocks'])}")
 
 if __name__ == "__main__":
     extract_data()
