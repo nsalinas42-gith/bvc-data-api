@@ -1,11 +1,24 @@
 {
-    "last_update": "13/05/2026 02:22 PM",
+    "last_update": "13/05/2026 02:30 PM",
     "market_summary": {
-        "dolar_bcv": "2024",
-        "ibc_principal": ".",
+        "dolar_bcv": "0",
+        "ibc_principal": "0",
         "ind_financiero": "0",
         "ind_industrial": "0",
-        "volumen_total": "0"
+        "volumen_total": "1.706.982.681,50."
     },
-    "stocks": []
+    "stocks": [
+        {
+            "ticker": "BVCC",
+            "precio": "Ver PDF",
+            "variacion": "16,39%",
+            "volumen": "N/A"
+        },
+        {
+            "ticker": "BNC",
+            "precio": "Ver PDF",
+            "variacion": "0,73%",
+            "volumen": "N/A"
+        }
+    ]
 }
