@@ -1,18 +1,11 @@
 {
-    "last_update": "14/05/2026 11:14 PM",
+    "last_update": "15/05/2026 11:15 PM",
     "market_summary": {
         "dolar_bcv": "Consultar",
         "ibc_principal": "N/A",
         "ind_financiero": "0",
         "ind_industrial": "0",
-        "volumen_total": "42.524.765,61."
+        "volumen_total": "0"
     },
-    "stocks": [
-        {
-            "ticker": "BVL",
-            "precio": "Ver PDF",
-            "variacion": "0,67%",
-            "volumen": "N/A"
-        }
-    ]
+    "stocks": []
 }
