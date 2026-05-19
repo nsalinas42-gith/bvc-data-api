@@ -1,11 +1,18 @@
 {
-    "last_update": "18/05/2026 11:46 PM",
+    "last_update": "19/05/2026 11:45 PM",
     "market_summary": {
         "dolar_bcv": "Consultar",
         "ibc_principal": "N/A",
         "ind_financiero": "0",
         "ind_industrial": "0",
-        "volumen_total": "0"
+        "volumen_total": "73.510.168,48."
     },
-    "stocks": []
+    "stocks": [
+        {
+            "ticker": "PTN",
+            "precio": "Ver PDF",
+            "variacion": "13,81%",
+            "volumen": "N/A"
+        }
+    ]
 }
