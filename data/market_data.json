@@ -1,29 +1,17 @@
 {
-    "last_update": "21/05/2026 11:38 PM",
+    "last_update": "22/05/2026 11:49 PM",
     "market_summary": {
         "dolar_bcv": "Consultar",
         "ibc_principal": "N/A",
         "ind_financiero": "0",
         "ind_industrial": "0",
-        "volumen_total": "144.142.043,20."
+        "volumen_total": "73.510.168,48."
     },
     "stocks": [
         {
-            "ticker": "GZL",
+            "ticker": "PTN",
             "precio": "Ver PDF",
-            "variacion": "9,38%",
-            "volumen": "N/A"
-        },
-        {
-            "ticker": "SVS",
-            "precio": "Ver PDF",
-            "variacion": "7,00%",
-            "volumen": "N/A"
-        },
-        {
-            "ticker": "FNC",
-            "precio": "Ver PDF",
-            "variacion": "3,83%",
+            "variacion": "13,81%",
             "volumen": "N/A"
         }
     ]
